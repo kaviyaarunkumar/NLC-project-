@@ -1,0 +1,57 @@
+CREATE DATABASE IF NOT EXISTS material_management;
+USE material_management;
+
+CREATE TABLE IF NOT EXISTS stores (
+  store_id INT PRIMARY KEY AUTO_INCREMENT,
+  store_name VARCHAR(100) NOT NULL,
+  location VARCHAR(150)
+);
+
+CREATE TABLE IF NOT EXISTS vendors (
+  vendor_id INT PRIMARY KEY AUTO_INCREMENT,
+  vendor_name VARCHAR(120) NOT NULL,
+  phone VARCHAR(25),
+  email VARCHAR(120)
+);
+
+CREATE TABLE IF NOT EXISTS buyers (
+  buyer_id INT PRIMARY KEY AUTO_INCREMENT,
+  buyer_name VARCHAR(120) NOT NULL,
+  department VARCHAR(100)
+);
+
+CREATE TABLE IF NOT EXISTS app_users (
+  user_id INT PRIMARY KEY AUTO_INCREMENT,
+  full_name VARCHAR(120) NOT NULL,
+  username VARCHAR(80) NOT NULL UNIQUE,
+  role VARCHAR(40) NOT NULL DEFAULT 'STAFF'
+);
+
+CREATE TABLE IF NOT EXISTS materials (
+  material_id INT PRIMARY KEY AUTO_INCREMENT,
+  item_name VARCHAR(120) NOT NULL,
+  description VARCHAR(255),
+  quantity INT NOT NULL DEFAULT 0,
+  unit VARCHAR(30) NOT NULL DEFAULT 'pcs',
+  store_id INT NULL,
+  vendor_id INT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_material_store FOREIGN KEY (store_id) REFERENCES stores(store_id) ON DELETE SET NULL,
+  CONSTRAINT fk_material_vendor FOREIGN KEY (vendor_id) REFERENCES vendors(vendor_id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS material_requests (
+  request_id INT PRIMARY KEY AUTO_INCREMENT,
+  requested_by VARCHAR(120) NOT NULL,
+  item_name VARCHAR(120) NOT NULL,
+  quantity INT NOT NULL,
+  purpose VARCHAR(255),
+  status VARCHAR(30) NOT NULL DEFAULT 'PENDING',
+  requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO stores (store_name, location) SELECT 'Main Store', 'Neyveli' WHERE NOT EXISTS (SELECT 1 FROM stores);
+INSERT INTO vendors (vendor_name, phone, email) SELECT 'Sample Vendor', '', '' WHERE NOT EXISTS (SELECT 1 FROM vendors);
+INSERT INTO materials (item_name, description, quantity, unit, store_id, vendor_id)
+SELECT 'Bearing', 'Sample machine spare part', 25, 'pcs', 1, 1
+WHERE NOT EXISTS (SELECT 1 FROM materials);
